@@ -17,7 +17,7 @@ reading and writing, not a made-up personal life.
 Never invent plot details, characters or quotes. A `quote` slide labelled with a book title must be a real line
 from that book (supplied by Shelley). Hooks you write yourself are not labelled as quotes from the book.
 
-## Four pillars (rotate; 4 posts a week)
+## Four pillars (rotate; 7 posts a week, one a day)
 1. **Book spotlight** — cover + hook carousel for one live book, with "link in bio".
 2. **Hooks & teasers** — "What would you do if…", first lines, one-line premises, real quotes.
 3. **Reader talk** — questions, this-or-that, reading season, recommendations of the genre (no other authors' books without reason).

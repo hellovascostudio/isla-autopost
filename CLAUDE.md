@@ -34,7 +34,8 @@ Read `brand/isla.md` before writing any content, and `plan/` for the current mon
 ## Weekly routine (Sundays)
 1. `git pull`. Look at `posts/published/`, `posts/queue/` and `plan/` to avoid repeats and follow the plan.
 2. Check the coming week (Mon–Sun) for reading moments (Halloween, Bonfire Night, Black Friday, Christmas reads, Kindle deals).
-3. Write 4 posts across the pillars, at least one book spotlight. Times: 18:30 weekdays, 10:00 weekends.
+3. Write 7 posts (one a day) across the pillars, at least two book spotlights (one per live book) and one reel.
+   Times: 18:30 weekdays, 10:00 weekends.
 4. Branch `week-YYYY-WW`, add folders, `python scripts/render.py --all`, look at every image (text fits, no overlaps), commit, push.
 5. PR titled `Week WW: <short theme>` with per post: day/time, caption, and images as
    `![](https://raw.githubusercontent.com/hellovascostudio/isla-autopost/<branch>/posts/queue/<folder>/01.jpg)`.
