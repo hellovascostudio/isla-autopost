@@ -37,18 +37,30 @@
       "pause": 0.8
     }
   ],
-  "stock": [
-    "vintage telephone",
-    "dark hallway night",
-    "glass of water night",
-    "stormy sea night",
-    "modern house night",
-    "cliff sea storm"
-  ],
   "end": {
     "kicker": "Out now",
     "title": "Answer the Landline",
     "body": "Kindle & paperback\nLink in bio"
   },
-  "caption": "Rule four: don’t answer the phone.\n\nAva is house-sitting on a remote Cornish headland. Three weeks, generous pay, a few simple rules.\n\nThen, at two o’clock one morning, the old cream telephone at the foot of the stairs begins to ring.\n\nAnswer the Landline is out now in Kindle and paperback. Link in bio. 📞\n\nWould you pick up?\n\n#psychologicalthriller #thrillerbooks #bookstagram #booktok #domesticthriller #kindleunlimited #britishthriller #indieauthor #cornwall"
+  "caption": "Rule four: don’t answer the phone.\n\nAva is house-sitting on a remote Cornish headland. Three weeks, generous pay, a few simple rules.\n\nThen, at two o’clock one morning, the old cream telephone at the foot of the stairs begins to ring.\n\nAnswer the Landline is out now in Kindle and paperback. Link in bio. 📞\n\nWould you pick up?\n\n#psychologicalthriller #thrillerbooks #bookstagram #booktok #domesticthriller #kindleunlimited #britishthriller #indieauthor #cornwall",
+  "scenes": [
+    {
+      "scene": "hall",
+      "at": 0
+    },
+    {
+      "scene": "kitchen",
+      "at": 2
+    },
+    {
+      "scene": "phone",
+      "at": 4,
+      "missed_at": 7
+    },
+    {
+      "scene": "hall",
+      "at": 8,
+      "night": true
+    }
+  ]
 }

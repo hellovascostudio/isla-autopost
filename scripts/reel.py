@@ -13,8 +13,9 @@ post.json fields (besides publish_at / pillar / caption):
                sfx "ring" = a soft electronic telephone trill during that pause)
     voice    : edge-tts voice (default en-GB-SoniaNeural)
     rate     : speaking rate (default "-6%")
-    stock    : list of Pexels search terms for background clips (needs PEXELS_API_KEY);
-               without a key or without results the background is a slow, dark, blurred cover
+    scenes   : animated, hand-drawn scenes that follow the excerpt (see scripts/scenes.py) — preferred
+    stock    : instead of scenes: Pexels search terms for background clips (needs PEXELS_API_KEY);
+               without scenes, key or results the background is a slow, dark, blurred cover
     end      : {"kicker": "Out now", "title": "...", "body": "..."}  end card text
 
 Output in the post folder: reel.mp4 and thumb.jpg (cover frame for the PR and Instagram).
@@ -249,7 +250,25 @@ GRADE = ("eq=saturation=0.45:brightness=-0.10:contrast=1.08,"
          "noise=alls=7:allf=t,vignette=PI/4")
 
 
-def background(post, total, tmp):
+def scene_background(post, total, tmp, ev):
+    from scenes import build
+    frame = build(post["scenes"], ev, total)
+    out = tmp / "bg.mp4"
+    n = int(round(total * FPS))
+    p = subprocess.Popen(["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
+                          "-r", str(FPS), "-i", "-", "-vf", "noise=alls=6:allf=t,vignette=PI/4.5,format=yuv420p",
+                          "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", str(out)], stdin=subprocess.PIPE)
+    for i in range(n):
+        p.stdin.write(frame(i / FPS).tobytes())
+    p.stdin.close()
+    if p.wait() != 0:
+        sys.exit("ffmpeg failed while encoding scenes")
+    return out, "scenes"
+
+
+def background(post, total, tmp, ev=None):
+    if post.get("scenes"):
+        return scene_background(post, total, tmp, ev)
     terms = post.get("stock", [])
     seg_target = 5.5
     need = max(1, min(len(terms), round(total / seg_target))) if terms else 0
@@ -301,8 +320,9 @@ def render_reel(folder):
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
         # 1. voice per line, build the timeline
-        t, voice_parts, sfx_parts, subs = LEAD_IN, [], [], []
+        t, voice_parts, sfx_parts, subs, line_starts = LEAD_IN, [], [], [], []
         for i, ln in enumerate(lines):
+            line_starts.append(t)
             mp3 = tmp / f"line{i:02d}.mp3"
             d = speak(ln["text"], voice, rate, mp3)
             voice_parts.append((mp3, t))
@@ -336,7 +356,7 @@ def render_reel(folder):
             sub_files.append((p, a, min(nxt, b + 0.6)))
 
         # 3. background
-        bg, mode = background(post, total, tmp)
+        bg, mode = background(post, total, tmp, {"lines": line_starts, "sfx": sfx_parts})
         print(f"  background: {mode}")
 
         # 4. compose video + audio

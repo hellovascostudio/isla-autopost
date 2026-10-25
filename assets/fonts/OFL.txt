@@ -1,3 +1,5 @@
+ReenieBeanie.ttf: Copyright 2010 James Grieshaber, SIL Open Font License 1.1 (same license as below).
+
 Copyright 2015 the Cormorant Project Authors (github.com/CatharsisFonts/Cormorant)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
