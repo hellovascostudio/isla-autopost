@@ -1,0 +1,49 @@
+name: Publish to Instagram
+
+on:
+  schedule:
+    - cron: "17 * * * *"   # elk uur (UTC); posts gaan live bij de eerste run na hun publish_at
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "check = alleen token testen, dry-run = niets plaatsen, publish = echt plaatsen"
+        type: choice
+        options: [check, dry-run, publish]
+        default: check
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow==11.3.0
+      - name: Render missing images
+        run: python scripts/render.py --all
+      - name: Publish
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          RAW_BASE: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}
+          DRY_RUN: ${{ inputs.mode == 'dry-run' && '1' || '0' }}
+        run: |
+          if [ "${{ inputs.mode }}" = "check" ]; then
+            python scripts/publish.py --check
+          else
+            python scripts/publish.py
+          fi
+      - name: Save state
+        if: always()
+        run: |
+          git config user.name "isla-autopost"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A posts
+          git diff --cached --quiet || (git commit -m "Published posts [skip ci]" && git push)
