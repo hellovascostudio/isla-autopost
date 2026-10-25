@@ -17,6 +17,16 @@ Read `brand/isla.md` before writing any content, and `plan/` for the current mon
 - `slides`: types `cover`, `text`, `quote`, `cta`, `book` (cover image + optional kicker/title), `photo`.
   One slide = single-image post; 2–10 slides = carousel.
 
+## Reels (book excerpts with voice-over)
+- `post.json` with `"type": "reel"`: `book`, `cover`, `hook`, `excerpt` (lines), `stock` (Pexels search terms), `end`, `caption`.
+  Field details are at the top of `scripts/reel.py`.
+- `excerpt` lines must be copied VERBATIM from the book (epubs are in Shelley's Documents › Amazon KDP Books).
+  Only use scenes from the first part of a book: no spoilers. Keep a reel under ~75 seconds.
+- `.github/workflows/render-reels.yml` makes `reel.mp4` + `thumb.jpg` on the week branch after a push
+  (British AI voice via edge-tts, Pexels clips if the `PEXELS_API_KEY` secret exists, else a dark mood background).
+  Watch the result before opening the PR. In the PR, show `thumb.jpg` and link `reel.mp4`.
+- Aim for at least one reel a week; it counts as the book spotlight.
+
 ## Weekly routine (Sundays)
 1. `git pull`. Look at `posts/published/`, `posts/queue/` and `plan/` to avoid repeats and follow the plan.
 2. Check the coming week (Mon–Sun) for reading moments (Halloween, Bonfire Night, Black Friday, Christmas reads, Kindle deals).

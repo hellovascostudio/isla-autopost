@@ -10,8 +10,8 @@ reading and writing, not a made-up personal life.
 ## The books (only promote books listed as live)
 | Book | Status | Cover | Hook / blurb |
 |---|---|---|---|
-| Answer the Landline | live (Kindle + paperback) | assets/covers/answer-the-landline.jpg (todo) | todo: blurb from Shelley |
-| Under the Lining | live (Kindle + paperback), set in Bath | assets/covers/under-the-lining.jpg (todo) | todo: blurb from Shelley |
+| Answer the Landline | live (Kindle + paperback), remote Cornish headland | assets/covers/answer-the-landline.jpg | She took the job to pay off a debt. She didn't know she was replacing someone. Ava house-sits for an architect whose wife Claire is "on a silent retreat"; at 2am the old cream telephone begins to ring. |
+| Under the Lining | live (Kindle + paperback), set in Bath | assets/covers/under-the-lining.jpg | There's a note sewn into the wedding dress. It's dated June 1998: "If you're wearing this, he's done it again." Seamstress Nell has nine days before the wedding. |
 | Cross When Clear | status unknown, check with Shelley | todo | school crossing patrol premise |
 
 Never invent plot details, characters or quotes. A `quote` slide labelled with a book title must be a real line
