@@ -44,34 +44,42 @@
     "body": "Kindle & paperback\nLink in bio"
   },
   "caption": "There’s a note sewn into the wedding dress.\n\nFor twenty-two years, Nell has altered other people’s dresses in her Bath workroom and never asked why. Then she opens a seam on the Lyall family’s gown, nine days before the wedding.\n\nUnder the Lining is out now in Kindle and paperback. Link in bio. 🧵\n\nWould you tell the bride?\n\n#psychologicalthriller #thrillerbooks #bookstagram #booktok #domesticthriller #kindleunlimited #britishthriller #indieauthor #weddingdress",
-  "scenes": [
+  "clips": [
     {
-      "scene": "workroom",
-      "at": 0
+      "at": 0,
+      "pixabay": 9398,
+      "focus": 0.45,
+      "note": "needle on ivory fabric"
     },
     {
-      "scene": "note",
-      "at": 3,
-      "lines": [
-        {
-          "text": "June 1998",
-          "at": 5
-        },
-        {
-          "text": "If you’re wearing this,",
-          "at": 7
-        },
-        {
-          "text": "he’s done it again.",
-          "at": 7,
-          "delay": 1.3
-        }
-      ]
+      "at": 2,
+      "pixabay": 9399,
+      "focus": 0.5,
+      "note": "sewing under the lamp"
     },
     {
-      "scene": "workroom",
+      "at": 4,
+      "pixabay": 8256,
+      "focus": 0.3,
+      "note": "pencil in hand"
+    },
+    {
+      "at": 5,
+      "pixabay": 258536,
+      "focus": 0.5,
+      "note": "writing in pencil"
+    },
+    {
+      "at": 8,
+      "pixabay": 74388,
+      "focus": 0.5,
+      "note": "rain on the window"
+    },
+    {
       "at": 10,
-      "focus": "dress"
+      "pixabay": 110492,
+      "focus": 0.5,
+      "note": "bride in her veil at the window"
     }
   ]
 }

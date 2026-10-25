@@ -6,7 +6,7 @@ name: Render reels
 on:
   push:
     branches: ["week-*"]
-    paths: ["posts/queue/**/post.json", "scripts/reel.py", "scripts/scenes.py"]
+    paths: ["posts/queue/**/post.json", "scripts/reel.py"]
   workflow_dispatch:
     inputs:
       force:
@@ -29,11 +29,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pillow==11.3.0 numpy==2.2.6 edge-tts==7.3.1
+      - run: pip install pillow==11.3.0 edge-tts==7.3.1
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg && ffmpeg -version | head -1
       - name: Render
         env:
-          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
         run: |
           set -o pipefail
           python scripts/reel.py --all ${{ inputs.force && '--force' || '' }} 2>&1 | tee render.log || {

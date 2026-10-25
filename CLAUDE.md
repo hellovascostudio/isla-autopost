@@ -18,13 +18,18 @@ Read `brand/isla.md` before writing any content, and `plan/` for the current mon
   One slide = single-image post; 2–10 slides = carousel.
 
 ## Reels (book excerpts with voice-over)
-- `post.json` with `"type": "reel"`: `book`, `cover`, `hook`, `excerpt` (lines), `scenes`, `end`, `caption`.
-  Field details are at the top of `scripts/reel.py`; the drawn scenes (and how to add new ones) in `scripts/scenes.py`.
-  Every reel uses `scenes`, never a black background. For a new book, draw new scenes that fit its excerpt.
+- `post.json` with `"type": "reel"`: `book`, `cover`, `hook`, `excerpt` (lines), `clips`, `end`, `caption`.
+  Field details are at the top of `scripts/reel.py`.
+- `clips` = real stock footage from Pixabay (no drawn or animated scenes). Search Pixabay, LOOK at the candidates
+  (thumbnails/frames) and only pick clips that fit the line; no AI-generated or cartoon clips. Text in the story
+  (notes, phone screens) is shown only through the subtitles.
+- After rendering, save the used clips to Shelley's computer: Documents › Amazon KDP Books › <book> › Scenes,
+  named `NN-<note>-pixabay<ID>.mp4`, plus `scenes.txt` listing which clip belongs to which excerpt line
+  (`clips.json` in the post folder has the details). Never commit raw Pixabay clips to this public repo.
 - `excerpt` lines must be copied VERBATIM from the book (epubs are in Shelley's Documents › Amazon KDP Books).
   Only use scenes from the first part of a book: no spoilers. Keep a reel under ~75 seconds.
 - `.github/workflows/render-reels.yml` makes `reel.mp4` + `thumb.jpg` on the week branch after a push
-  (British AI voice via edge-tts, animated drawn scenes; Pexels is not used: new API keys are paused).
+  (British AI voice via edge-tts with word timing for the subtitles, Pixabay clips via the `PIXABAY_API_KEY` secret).
   Watch the result before opening the PR. In the PR, show `thumb.jpg` and link `reel.mp4`.
 - Aim for at least one reel a week; it counts as the book spotlight.
 

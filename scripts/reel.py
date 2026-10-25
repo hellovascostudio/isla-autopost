@@ -13,12 +13,15 @@ post.json fields (besides publish_at / pillar / caption):
                sfx "ring" = a soft electronic telephone trill during that pause)
     voice    : edge-tts voice (default en-GB-SoniaNeural)
     rate     : speaking rate (default "-6%")
-    scenes   : animated, hand-drawn scenes that follow the excerpt (see scripts/scenes.py) — preferred
-    stock    : instead of scenes: Pexels search terms for background clips (needs PEXELS_API_KEY);
-               without scenes, key or results the background is a slow, dark, blurred cover
+    clips    : real stock footage from Pixabay, one clip per scene:
+               [{"at": 0, "pixabay": 119507, "focus": 0.5, "start": 0, "note": "cream telephone"}, ...]
+               "at" = excerpt line where the clip starts; "focus" = horizontal crop position (0 left … 1 right)
+               for landscape footage; "start" = seconds to skip at the beginning of the clip.
+               Choose clips by looking at them first. Without clips the background is a dark, blurred cover.
     end      : {"kicker": "Out now", "title": "...", "body": "..."}  end card text
 
-Output in the post folder: reel.mp4 and thumb.jpg (cover frame for the PR and Instagram).
+Output in the post folder: reel.mp4, thumb.jpg (cover frame for the PR and Instagram) and
+clips.json (which Pixabay clip is used where, with links, for reuse in a longer video).
 
 Usage:
     python scripts/reel.py posts/queue/2026-10-29-under-the-lining   # one reel
@@ -26,7 +29,7 @@ Usage:
     python scripts/reel.py --all --force
 
 Env:
-    PEXELS_API_KEY   optional, free key from pexels.com/api
+    PIXABAY_API_KEY  needed for "clips" (GitHub secret)
     REEL_FAKE_TTS=1  local test without network: silence instead of a voice
 """
 import asyncio
@@ -54,7 +57,8 @@ END_CARD = 4.5       # seconds
 SUB_Y = 1180         # top of the subtitle area (stays clear of the Reels UI at the bottom)
 HOOK_UNTIL = 4.2     # hook text visible until (seconds)
 FAKE = os.environ.get("REEL_FAKE_TTS") == "1"
-PEXELS = os.environ.get("PEXELS_API_KEY", "")
+PIXABAY = os.environ.get("PIXABAY_API_KEY", "")
+UA = {"User-Agent": "Mozilla/5.0 (isla-autopost)"}
 
 
 def run(cmd):
@@ -77,23 +81,34 @@ def clean(text):
 # ---------- voice ----------
 
 async def _tts(text, voice, rate, path):
+    """Write the speech to path and return the start time (seconds) of every spoken word."""
     import edge_tts
-    await edge_tts.Communicate(text, voice, rate=rate).save(str(path))
+    words = []
+    com = edge_tts.Communicate(text, voice, rate=rate, boundary="WordBoundary")
+    with open(path, "wb") as f:
+        async for chunk in com.stream():
+            if chunk["type"] == "audio":
+                f.write(chunk["data"])
+            elif chunk["type"] == "WordBoundary":
+                words.append(chunk["offset"] / 1e7)
+    return words
 
 
 def speak(text, voice, rate, path):
+    """Return (duration, word start times)."""
+    words = []
     if FAKE:
         secs = max(1.0, len(text.split()) / 2.5)
         run(["ffmpeg", "-y", "-f", "lavfi", "-i", "anullsrc=r=48000:cl=mono", "-t", f"{secs:.2f}", str(path)])
     else:
         for attempt in range(3):
             try:
-                asyncio.run(_tts(text, voice, rate, path))
+                words = asyncio.run(_tts(text, voice, rate, path))
                 break
             except Exception as e:  # network hiccup: retry
                 if attempt == 2:
                     sys.exit(f"edge-tts failed: {e}")
-    return duration(path)
+    return duration(path), words
 
 
 # ---------- subtitles ----------
@@ -206,90 +221,75 @@ def end_png(path, post):
 
 # ---------- background ----------
 
-def pexels_clips(terms, tmp, need):
-    if not PEXELS:
-        return []
-    got, seen = [], set()
-    for term in terms:
-        url = "https://api.pexels.com/videos/search?" + urllib.parse.urlencode(
-            {"query": term, "orientation": "portrait", "size": "medium", "per_page": 8})
-        req = urllib.request.Request(url, headers={"Authorization": PEXELS, "User-Agent": "isla-autopost"})
+def pixabay_clip(clip_id, cache):
+    """Download one Pixabay video (by id) into cache; return (path, hit)."""
+    if not PIXABAY:
+        sys.exit("PIXABAY_API_KEY ontbreekt (GitHub secret).")
+    cache.mkdir(parents=True, exist_ok=True)
+    url = "https://pixabay.com/api/videos/?" + urllib.parse.urlencode({"key": PIXABAY, "id": clip_id})
+    for attempt in range(3):
         try:
-            with urllib.request.urlopen(req, timeout=30) as r:
-                videos = json.loads(r.read()).get("videos", [])
+            with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60) as r:
+                hits = json.loads(r.read())["hits"]
+            break
         except Exception as e:
-            print(f"  pexels '{term}': {e}")
-            continue
-        for v in videos:
-            if v["id"] in seen or v.get("duration", 0) < 4:
-                continue
-            files = [f for f in v["video_files"] if f.get("height") and f.get("width")
-                     and f["height"] > f["width"] and f["width"] >= 720 and f.get("file_type") == "video/mp4"]
-            if not files:
-                continue
-            f = min(files, key=lambda f: abs(f["width"] - 1080))
-            dest = tmp / f"pexels-{v['id']}.mp4"
-            req = urllib.request.Request(f["link"], headers={"User-Agent": "isla-autopost"})
-            try:
-                with urllib.request.urlopen(req, timeout=120) as r:
-                    dest.write_bytes(r.read())
-            except Exception as e:
-                print(f"  pexels download {v['id']}: {e}")
-                continue
-            seen.add(v["id"])
-            got.append(dest)
-            print(f"  clip '{term}': pexels.com/video/{v['id']}")
-            break
-        if len(got) >= need:
-            break
-    return got
+            if attempt == 2:
+                sys.exit(f"pixabay {clip_id}: {e}")
+    if not hits:
+        sys.exit(f"pixabay {clip_id}: not found")
+    hit = hits[0]
+    v = hit["videos"]
+    f = v["large"] if v.get("large", {}).get("url") and v["large"].get("width", 0) >= 1280 else v["medium"]
+    dest = cache / f"pixabay-{clip_id}.mp4"
+    if not dest.exists():
+        with urllib.request.urlopen(urllib.request.Request(f["url"], headers=UA), timeout=300) as r:
+            dest.write_bytes(r.read())
+    return dest, hit
 
 
-GRADE = ("eq=saturation=0.45:brightness=-0.10:contrast=1.08,"
-         "colorbalance=rs=-0.04:bs=0.07:rm=-0.02:bm=0.04,"
-         "noise=alls=7:allf=t,vignette=PI/4")
+GRADE = ("eq=saturation=0.78:brightness=-0.07:contrast=1.07,"
+         "colorbalance=rs=-0.03:bs=0.05:rm=-0.01:bm=0.02,"
+         "noise=alls=4:allf=t,vignette=PI/4.2")
 
 
-def scene_background(post, total, tmp, ev):
-    from scenes import build
-    frame = build(post["scenes"], ev, total)
+def clips_background(post, total, tmp, ev, folder):
+    """Cut the chosen Pixabay clips to the timeline, crop to 9:16, grade and join them."""
+    specs = post["clips"]
+    starts = [0.0 if i == 0 else max(0.0, ev["lines"][c["at"]] - 0.25) for i, c in enumerate(specs)]
+    ends = starts[1:] + [total]
+    cache = Path(os.environ.get("REEL_CACHE", tmp / "clips"))
+    parts, credits = [], []
+    for i, (c, a, b) in enumerate(zip(specs, starts, ends)):
+        src, hit = pixabay_clip(c["pixabay"], cache)
+        seg = b - a
+        nat = max(0.5, duration(src) - float(c.get("start", 0)))
+        slow = min(1.6, max(1.1, seg / nat))                      # a little slower = calmer, more cinematic
+        fade = 0.35
+        focus = float(c.get("focus", 0.5))
+        p = tmp / f"seg{i:02d}.mp4"
+        run(["ffmpeg", "-y", "-ss", str(c.get("start", 0)), "-stream_loop", "-1", "-i", str(src),
+             "-t", f"{seg:.3f}", "-an", "-vf",
+             f"setpts={slow:.3f}*PTS,scale={W}:{H}:force_original_aspect_ratio=increase,"
+             f"crop={W}:{H}:x='(iw-{W})*{focus}':y='(ih-{H})/2',fps={FPS},{GRADE},"
+             f"fade=t=in:st=0:d={fade},fade=t=out:st={max(0, seg - fade):.3f}:d={fade},format=yuv420p",
+             "-c:v", "libx264", "-preset", "veryfast", "-crf", "19", str(p)])
+        parts.append(p)
+        credits.append({"from_line": c["at"], "seconds": [round(a, 2), round(b, 2)], "pixabay_id": hit["id"],
+                        "page": hit["pageURL"], "by": hit.get("user"), "tags": hit.get("tags"),
+                        "note": c.get("note", "")})
+        print(f"  clip {i + 1}: pixabay {hit['id']} ({c.get('note', '')}) {a:.1f}-{b:.1f}s")
+    lst = tmp / "segs.txt"
+    lst.write_text("".join(f"file '{p.as_posix()}'\n" for p in parts))
     out = tmp / "bg.mp4"
-    n = int(round(total * FPS))
-    p = subprocess.Popen(["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
-                          "-r", str(FPS), "-i", "-", "-vf", "noise=alls=6:allf=t,vignette=PI/4.5,format=yuv420p",
-                          "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", str(out)], stdin=subprocess.PIPE)
-    for i in range(n):
-        p.stdin.write(frame(i / FPS).tobytes())
-    p.stdin.close()
-    if p.wait() != 0:
-        sys.exit("ffmpeg failed while encoding scenes")
-    return out, "scenes"
+    run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(lst), "-c", "copy", str(out)])
+    (folder / "clips.json").write_text(json.dumps(credits, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return out, "pixabay"
 
 
-def background(post, total, tmp, ev=None):
-    if post.get("scenes"):
-        return scene_background(post, total, tmp, ev)
-    terms = post.get("stock", [])
-    seg_target = 5.5
-    need = max(1, min(len(terms), round(total / seg_target))) if terms else 0
-    clips = pexels_clips(terms, tmp, need) if need else []
+def background(post, total, tmp, ev=None, folder=None):
+    if post.get("clips"):
+        return clips_background(post, total, tmp, ev, folder)
     out = tmp / "bg.mp4"
-    if clips:
-        seg = total / len(clips)
-        parts = []
-        for i, c in enumerate(clips):
-            p = tmp / f"seg{i}.mp4"
-            fade = min(0.5, seg / 4)
-            run(["ffmpeg", "-y", "-stream_loop", "-1", "-i", str(c), "-t", f"{seg:.3f}", "-an",
-                 "-vf", f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},fps={FPS},"
-                        f"setpts=1.25*PTS,{GRADE},fade=t=in:st=0:d={fade:.2f},"
-                        f"fade=t=out:st={seg - fade:.3f}:d={fade:.2f},format=yuv420p",
-                 "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", str(p)])
-            parts.append(p)
-        lst = tmp / "segs.txt"
-        lst.write_text("".join(f"file '{p.as_posix()}'\n" for p in parts))
-        run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(lst), "-c", "copy", str(out)])
-        return out, "pexels"
     # mood fallback: the cover, heavily blurred into the navy, drifting slowly upwards
     cover = Image.open(ROOT / post["cover"]).convert("RGB")
     bw, bh = int(W * 1.12), int(H * 1.12)
@@ -324,15 +324,24 @@ def render_reel(folder):
         for i, ln in enumerate(lines):
             line_starts.append(t)
             mp3 = tmp / f"line{i:02d}.mp3"
-            d = speak(ln["text"], voice, rate, mp3)
+            d, words = speak(ln["text"], voice, rate, mp3)
             voice_parts.append((mp3, t))
             pieces = chunks(clean(ln["text"]))
-            total_chars = sum(len(p) for p in pieces)
-            st, speech = t + 0.08, max(0.4, d - 0.25)
-            for p in pieces:
-                dur = speech * len(p) / total_chars
-                subs.append((p, st, st + dur))
-                st += dur
+            n_words = sum(len(p.split()) for p in pieces)
+            if words and len(words) >= n_words:      # real timing: each phrase starts with its first word
+                k = 0
+                for j, p in enumerate(pieces):
+                    a = t + words[k]
+                    k += len(p.split())
+                    b = t + words[k] if k < len(words) else t + d - 0.1
+                    subs.append((p, a, b))
+            else:                                     # fallback: spread by length
+                total_chars = sum(len(p) for p in pieces)
+                st, speech = t + 0.08, max(0.4, d - 0.25)
+                for p in pieces:
+                    dur = speech * len(p) / total_chars
+                    subs.append((p, st, st + dur))
+                    st += dur
             t += d
             pause = float(ln.get("pause", GAP))
             if ln.get("sfx") == "ring":
@@ -356,7 +365,7 @@ def render_reel(folder):
             sub_files.append((p, a, min(nxt, b + 0.6)))
 
         # 3. background
-        bg, mode = background(post, total, tmp, {"lines": line_starts, "sfx": sfx_parts})
+        bg, mode = background(post, total, tmp, {"lines": line_starts, "sfx": sfx_parts}, folder)
         print(f"  background: {mode}")
 
         # 4. compose video + audio
