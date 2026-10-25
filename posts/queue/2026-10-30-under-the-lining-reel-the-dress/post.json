@@ -1,0 +1,48 @@
+{
+  "type": "reel",
+  "style": "page",
+  "pillar": "Book spotlight",
+  "book": "Under the Lining",
+  "cover": "assets/covers/under-the-lining.jpg",
+  "voice": "en-GB-SoniaNeural",
+  "rate": "-6%",
+  "end": {
+    "kicker": "Out now",
+    "title": "Under the Lining",
+    "body": "Kindle & paperback\nLink in bio"
+  },
+  "publish_at": "2026-10-30T12:30:00+01:00",
+  "hook": "Some wedding dresses come with a family.",
+  "excerpt": [
+    {
+      "text": "The dress arrived before the bride did.",
+      "pause": 0.8
+    },
+    "She had been in this room for twenty-two years, first as the girl who swept up pins and was allowed, after eighteen months, to sew on a hook, and then as the woman whose name was on the door.",
+    "It was only that this dress had a name, and in her experience dresses with names were trouble.",
+    {
+      "text": "A bride could be anything. A dress with a name came with a family.",
+      "key": true,
+      "pause": 0.9
+    },
+    "Silk faille, the colour of good cream gone a shade towards butter at the folds, with the fine horizontal rib that took the light in lines.",
+    {
+      "text": "Twenty-two covered buttons down the back, each with its own hand-worked loop.",
+      "pause": 0.7
+    },
+    {
+      "text": "‘It’s a costume.’ But she didn’t look away from it.",
+      "pause": 0.8
+    },
+    "‘Margaret says it’s bad luck to change anything but the fit,’ Tamsin said.",
+    {
+      "text": "Lyall brides don’t change the dress, the dress changes them.",
+      "pause": 0.6
+    },
+    {
+      "text": "She said that at dinner, with a straight face. Oliver laughed, and then he sort of stopped laughing.",
+      "pause": 0.8
+    }
+  ],
+  "caption": "Some wedding dresses come with a family.\n\nThe Lyall gown has been worn by three brides. Nine days before the next wedding, it arrives in Nell’s workroom in Bath.\n\n‘Lyall brides don’t change the dress, the dress changes them.’\n\nUnder the Lining is out now in Kindle and paperback. Link in bio. 🧵\n\n#psychologicalthriller #thrillerbooks #bookstagram #booktok #domesticthriller #kindleunlimited #britishthriller #indieauthor #weddingdress"
+}
