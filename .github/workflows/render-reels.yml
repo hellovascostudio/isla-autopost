@@ -30,11 +30,15 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pillow==11.3.0 edge-tts==7.2.8
-      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg && ffmpeg -version | head -1
       - name: Render
         env:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
-        run: python scripts/reel.py --all ${{ inputs.force && '--force' || '' }}
+        run: |
+          set -o pipefail
+          python scripts/reel.py --all ${{ inputs.force && '--force' || '' }} 2>&1 | tee render.log || {
+            echo "::error title=Render failed::$(tail -c 3500 render.log | tr '\n' ' ')"; exit 1; }
+          rm -f render.log
       - name: Commit videos
         run: |
           git config user.name "isla-autopost"
