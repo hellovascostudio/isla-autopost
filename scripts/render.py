@@ -229,6 +229,8 @@ if __name__ == "__main__":
     if args[0] == "--all":
         for d in sorted((ROOT / "posts" / "queue").glob("*/")):
             if (d / "post.json").exists() and not (d / "01.jpg").exists():
+                if json.loads((d / "post.json").read_text(encoding="utf-8")).get("type") == "reel":
+                    continue  # reels are made by scripts/reel.py
                 render_post(d)
     else:
         for a in args:

@@ -52,14 +52,15 @@ def call(method, path, **params):
         raise ApiError(f"{method} {path} -> {e.code}: {body}") from None
 
 
-def wait_ready(container_id, tries=30):
+def wait_ready(container_id, tries=30, delay=5):
     for _ in range(tries):
-        st = call("GET", container_id, fields="status_code,status").get("status_code")
+        res = call("GET", container_id, fields="status_code,status")
+        st = res.get("status_code")
         if st == "FINISHED":
             return
         if st in ("ERROR", "EXPIRED"):
-            raise ApiError(f"container {container_id} status {st}")
-        time.sleep(5)
+            raise ApiError(f"container {container_id} status {st}: {res.get('status', '')}")
+        time.sleep(delay)
     raise ApiError(f"container {container_id} not ready in time")
 
 
@@ -71,6 +72,11 @@ def validate(folder, post):
         errs.append("caption langer dan 2200 tekens")
     if post.get("caption", "").count("#") > 30:
         errs.append("meer dan 30 hashtags")
+    if post.get("type") == "reel":
+        video = folder / "reel.mp4"
+        if not video.exists():
+            errs.append("reel.mp4 ontbreekt; draai de workflow 'Render reels' op de week-branch")
+        return [video], errs
     imgs = sorted(folder.glob("[0-9][0-9].jpg"))
     if not imgs:
         errs.append("geen afbeeldingen (01.jpg ...) gevonden; draai scripts/render.py")
@@ -83,6 +89,13 @@ def publish(folder, post, imgs, user_id):
     rel = folder.relative_to(ROOT).as_posix()
     urls = [f"{RAW_BASE}/{urllib.parse.quote(rel)}/{p.name}" for p in imgs]
     caption = post["caption"]
+    if post.get("type") == "reel":
+        params = {"media_type": "REELS", "video_url": urls[0], "caption": caption, "share_to_feed": "true"}
+        if (folder / "thumb.jpg").exists():
+            params["cover_url"] = f"{RAW_BASE}/{urllib.parse.quote(rel)}/thumb.jpg"
+        c = call("POST", f"{user_id}/media", **params)["id"]
+        wait_ready(c, tries=60, delay=10)  # video processing takes a few minutes
+        return call("POST", f"{user_id}/media_publish", creation_id=c)["id"]
     if len(urls) == 1:
         c = call("POST", f"{user_id}/media", image_url=urls[0], caption=caption)["id"]
     else:
