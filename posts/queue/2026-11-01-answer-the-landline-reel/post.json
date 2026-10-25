@@ -34,7 +34,8 @@
     },
     {
       "text": "Rule four. Don’t answer this.",
-      "pause": 0.8
+      "pause": 0.8,
+      "key": true
     }
   ],
   "end": {
@@ -43,62 +44,5 @@
     "body": "Kindle & paperback\nLink in bio"
   },
   "caption": "Rule four: don’t answer the phone.\n\nAva is house-sitting on a remote Cornish headland. Three weeks, generous pay, a few simple rules.\n\nThen, at two o’clock one morning, the old cream telephone at the foot of the stairs begins to ring.\n\nAnswer the Landline is out now in Kindle and paperback. Link in bio. 📞\n\nWould you pick up?\n\n#psychologicalthriller #thrillerbooks #bookstagram #booktok #domesticthriller #kindleunlimited #britishthriller #indieauthor #cornwall",
-  "clips": [
-    {
-      "at": 0,
-      "pixabay": 119507,
-      "focus": 0.35,
-      "note": "cream telephone"
-    },
-    {
-      "at": 1,
-      "pixabay": 257351,
-      "focus": 0.5,
-      "note": "telephone in the dark"
-    },
-    {
-      "at": 2,
-      "pixabay": 5629,
-      "focus": 0.5,
-      "note": "glass of water at the tap"
-    },
-    {
-      "at": 3,
-      "pixabay": 143774,
-      "focus": 0.5,
-      "note": "dark window at night"
-    },
-    {
-      "at": 4,
-      "pixabay": 34767,
-      "focus": 0.35,
-      "note": "cordless phone ringing"
-    },
-    {
-      "at": 5,
-      "pixabay": 160944,
-      "focus": 0.5,
-      "note": "moon over the sea"
-    },
-    {
-      "at": 6,
-      "pixabay": 34767,
-      "focus": 0.35,
-      "start": 8,
-      "note": "phone, counting the rings"
-    },
-    {
-      "at": 7,
-      "pixabay": 61298,
-      "focus": 0.6,
-      "note": "a person with a phone at night"
-    },
-    {
-      "at": 8,
-      "pixabay": 119507,
-      "focus": 0.35,
-      "start": 6,
-      "note": "the telephone again"
-    }
-  ]
+  "style": "page"
 }

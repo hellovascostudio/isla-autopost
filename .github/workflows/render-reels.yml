@@ -6,7 +6,7 @@ name: Render reels
 on:
   push:
     branches: ["week-*"]
-    paths: ["posts/queue/**/post.json", "scripts/reel.py"]
+    paths: ["posts/queue/**/post.json", "scripts/reel.py", "video/src/**"]
   workflow_dispatch:
     inputs:
       force:
@@ -31,6 +31,12 @@ jobs:
           python-version: "3.12"
       - run: pip install pillow==11.3.0 edge-tts==7.3.1
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg && ffmpeg -version | head -1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Remotion
+        working-directory: video
+        run: npm ci && npx remotion browser ensure
       - name: Render
         env:
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}

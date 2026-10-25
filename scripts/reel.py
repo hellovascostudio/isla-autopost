@@ -13,6 +13,10 @@ post.json fields (besides publish_at / pillar / caption):
                sfx "ring" = a soft electronic telephone trill during that pause)
     voice    : edge-tts voice (default en-GB-SoniaNeural)
     rate     : speaking rate (default "-6%")
+    style    : "page" (default) = designed book-page video made with Remotion (video/): cream paper, the words
+               turn to ink as they are read, page turns, key line in italic with a red wavy underline.
+               Mark a key line in the excerpt with {"text": "...", "key": true}.
+               "clips" = the older stock-footage style below.
     clips    : real stock footage from Pixabay, one clip per scene:
                [{"at": 0, "pixabay": 119507, "focus": 0.5, "start": 0, "note": "cream telephone"}, ...]
                "at" = excerpt line where the clip starts; "focus" = horizontal crop position (0 left … 1 right)
@@ -320,12 +324,18 @@ def render_reel(folder):
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
         # 1. voice per line, build the timeline
-        t, voice_parts, sfx_parts, subs, line_starts = LEAD_IN, [], [], [], []
+        page_style = post.get("style", "page") == "page"
+        t = PAGE_LEAD if page_style else LEAD_IN
+        voice_parts, sfx_parts, subs, line_starts, page_lines = [], [], [], [], []
         for i, ln in enumerate(lines):
             line_starts.append(t)
             mp3 = tmp / f"line{i:02d}.mp3"
             d, words = speak(ln["text"], voice, rate, mp3)
             voice_parts.append((mp3, t))
+            n_tok = len(ln["text"].split())
+            abs_words = [round(t + w, 3) for w in words] if len(words) == n_tok else []
+            page_lines.append({"text": ln["text"], "start": round(t, 3), "end": round(t + d, 3),
+                               "words": abs_words, "key": bool(ln.get("key"))})
             pieces = chunks(clean(ln["text"]))
             n_words = sum(len(p.split()) for p in pieces)
             if words and len(words) >= n_words:      # real timing: each phrase starts with its first word
@@ -351,6 +361,11 @@ def render_reel(folder):
         end_start = t + 0.4
         total = end_start + END_CARD
         print(f"{folder.name}: {total:.1f}s, {len(lines)} lines, {len(subs)} subtitles")
+
+        if page_style:
+            out = render_page_video(post, folder, tmp, page_lines, sfx_parts, end_start, total)
+            mux_audio(out, tmp, voice_parts, sfx_parts, total, folder)
+            return folder / "reel.mp4"
 
         # 2. graphics
         hook_png(tmp / "hook.png", post)
@@ -417,6 +432,98 @@ def render_reel(folder):
     mb = out.stat().st_size / 1e6
     print(f"  -> {out.relative_to(ROOT)} ({mb:.1f} MB)")
     return out
+
+
+PAGE_LEAD = 3.2      # title page with the hook before the voice starts
+VIDEO = ROOT / "video"
+
+
+def paginate(lines, width=W - 220, max_h=1250):
+    """Split the excerpt over book pages, measuring the text with the same font as the video."""
+    from PIL import ImageFont
+    reg = ImageFont.truetype(str(ROOT / "assets/fonts/CormorantGaramond.ttf"), 66)
+    ita = ImageFont.truetype(str(ROOT / "assets/fonts/CormorantGaramond-Italic.ttf"), 66)
+    for f, w in ((reg, "Medium"), (ita, "SemiBold Italic")):
+        try:
+            f.set_variation_by_name(w)
+        except Exception:
+            pass
+    d = ImageDraw.Draw(Image.new("L", (10, 10)))
+    page, used = 0, 0
+    for ln in lines:
+        f = ita if ln["key"] else reg
+        rows, cur = 1, ""
+        for word in ln["text"].split():
+            test = f"{cur} {word}".strip()
+            if d.textlength(test, font=f) * 1.03 > width and cur:
+                rows, cur = rows + 1, word
+            else:
+                cur = test
+        h = rows * 94 + 40
+        if used and used + h > max_h:
+            page, used = page + 1, 0
+        ln["page"] = page
+        used += h
+    return page + 1
+
+
+def render_page_video(post, folder, tmp, lines, rings, end_start, total):
+    import shutil
+    pages = paginate(lines)
+    starts = [min(l["start"] for l in lines if l["page"] == i) - 0.2 for i in range(pages)]
+    starts[0] = PAGE_LEAD - 0.4
+    pub = VIDEO / "public"
+    (pub / "fonts").mkdir(parents=True, exist_ok=True)
+    for f in (ROOT / "assets/fonts").glob("*.ttf"):
+        shutil.copy(f, pub / "fonts" / f.name)
+    shutil.copy(ROOT / post["cover"], pub / "cover.jpg")
+    props = {
+        "book": post["book"], "author": "Isla Kerrow", "hook": clean(post["hook"]), "hookEnd": PAGE_LEAD - 0.2,
+        "endStart": round(end_start, 3), "total": round(total, 3), "lines": lines, "pages": pages,
+        "pageStarts": [round(x, 3) for x in starts], "rings": [[round(a, 3), round(b, 3)] for a, b in rings],
+        "cover": "cover.jpg", "end": post.get("end", {}), "handle": BRAND["handle"],
+    }
+    pf = tmp / "props.json"
+    pf.write_text(json.dumps(props, ensure_ascii=False))
+    out = tmp / "page.mp4"
+    cmd = ["npx", "remotion", "render", "src/index.ts", "BookPage", str(out), f"--props={pf}", "--muted",
+           "--log=error", "--concurrency=2"]
+    if os.environ.get("REMOTION_BROWSER"):
+        cmd.append(f"--browser-executable={os.environ['REMOTION_BROWSER']}")
+    r = subprocess.run(cmd, cwd=VIDEO, capture_output=True, text=True)
+    if r.returncode != 0:
+        sys.exit(f"remotion failed:\n{r.stdout[-2000:]}\n{r.stderr[-3000:]}")
+    print(f"  page video: {pages} page(s)")
+    return out
+
+
+def mux_audio(video, tmp, voice_parts, sfx_parts, total, folder):
+    inputs, fa, mix, n = ["-i", str(video)], [], [], 1
+    for i, (mp3, st) in enumerate(voice_parts):
+        inputs += ["-i", str(mp3)]
+        ms = int(st * 1000)
+        fa.append(f"[{n}:a]aresample=48000,aformat=channel_layouts=stereo,adelay={ms}|{ms}[a{i}]")
+        mix.append(f"[a{i}]")
+        n += 1
+    for j, (st, d) in enumerate(sfx_parts):
+        ms = int(st * 1000)
+        fa.append(RING.format(d=d) + f",afade=t=out:st={d - 0.3:.2f}:d=0.3,"
+                  f"aformat=channel_layouts=stereo,adelay={ms}|{ms}[r{j}]")
+        mix.append(f"[r{j}]")
+    fa.append(f"anoisesrc=color=brown:amplitude=0.5:r=48000:d={total:.2f},lowpass=f=260,volume=0.08,"
+              f"aformat=channel_layouts=stereo,afade=t=in:d=1.5,afade=t=out:st={total - 1.5:.2f}:d=1.5[amb]")
+    mix.append("[amb]")
+    fa.append(f"{''.join(mix)}amix=inputs={len(mix)}:normalize=0:duration=longest,"
+              f"atrim=0:{total:.2f},loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[aout]")
+    script = tmp / "agraph.txt"
+    script.write_text(";\n".join(fa))
+    out = folder / "reel.mp4"
+    run(["ffmpeg", "-y", *inputs, "-filter_complex_script", str(script), "-map", "0:v", "-map", "[aout]",
+         "-t", f"{total:.2f}", "-c:v", "libx264", "-preset", "veryfast", "-crf", "21", "-maxrate", "6M",
+         "-bufsize", "12M", "-pix_fmt", "yuv420p", "-r", str(FPS), "-c:a", "aac", "-b:a", "160k", "-ar", "48000",
+         "-movflags", "+faststart", str(out)])
+    run(["ffmpeg", "-y", "-ss", "1.2", "-i", str(out), "-frames:v", "1", "-q:v", "3", str(folder / "thumb.jpg")])
+    print(f"  -> {out} ({out.stat().st_size / 1e6:.1f} MB)")
 
 
 def is_reel(folder):
