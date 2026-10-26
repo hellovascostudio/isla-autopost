@@ -12,7 +12,7 @@ reading and writing, not a made-up personal life.
 |---|---|---|---|
 | Answer the Landline | live (Kindle + paperback), remote Cornish headland | assets/covers/answer-the-landline.jpg | She took the job to pay off a debt. She didn't know she was replacing someone. Ava house-sits for an architect whose wife Claire is "on a silent retreat"; at 2am the old cream telephone begins to ring. |
 | Under the Lining | live (Kindle + paperback), set in Bath | assets/covers/under-the-lining.jpg | There's a note sewn into the wedding dress. It's dated June 1998: "If you're wearing this, he's done it again." Seamstress Nell has nine days before the wedding. |
-| Cross When Clear | submitted to KDP 26 Oct 2026 (Kindle + paperback, live within 72 h); say "coming soon" until live | assets/covers/cross-when-clear.jpg | Every afternoon at a quarter past three, a little girl crosses Lorna Webb's road. Lorna, lollipop lady at St Anne's Primary in Gloucester for eleven years, notices the girl in the red jumper with a felt fox on her bag, met by a different woman every day. The school says they have no such pupil. |
+| Cross When Clear | live (Kindle + paperback) since 26 Oct 2026 | assets/covers/cross-when-clear.jpg | Every afternoon at a quarter past three, a little girl crosses Lorna Webb's road. Lorna, lollipop lady at St Anne's Primary in Gloucester for eleven years, notices the girl in the red jumper with a felt fox on her bag, met by a different woman every day. The school says they have no such pupil. |
 
 Never invent plot details, characters or quotes. A `quote` slide labelled with a book title must be a real line
 from that book (supplied by Shelley). Hooks you write yourself are not labelled as quotes from the book.
