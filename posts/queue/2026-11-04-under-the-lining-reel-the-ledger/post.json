@@ -1,0 +1,43 @@
+{
+  "type": "reel",
+  "style": "page",
+  "pillar": "Book spotlight",
+  "book": "Under the Lining",
+  "cover": "assets/covers/under-the-lining.jpg",
+  "voice": "en-GB-SoniaNeural",
+  "rate": "-6%",
+  "end": {
+    "kicker": "Out now",
+    "title": "Under the Lining",
+    "body": "Kindle & paperback\nLink in bio"
+  },
+  "publish_at": "2026-11-04T18:30:00+01:00",
+  "hook": "A dressmaker’s ledger. June 1998.",
+  "excerpt": [
+    {
+      "text": "From the ledgers of Iris Penhale, dressmaker, Walcot Street, Bath",
+      "pause": 0.7
+    },
+    "12 May 1998. Lyall: the Eleanor dress (1956, ivory silk faille). Bride, Miss A. Corrigan.",
+    {
+      "text": "Take in waist 1.5 cm. New hooks and eyes. Hem to her shoes, not the floor. Laughs a lot. Wants pockets. No.",
+      "pause": 0.9
+    },
+    {
+      "text": "20 June 1998. Hartswell. She looked happy.",
+      "pause": 1.2
+    },
+    "Walcot Street was empty.",
+    "She thought about the words, which she could see without the calico in front of her; she would be able to see them for some time.",
+    {
+      "text": "He’s done it again. Not he will. Not be careful.",
+      "key": true,
+      "pause": 0.7
+    },
+    {
+      "text": "As if whoever wrote it had been sure that the next woman to read it would already be too late.",
+      "pause": 0.9
+    }
+  ],
+  "caption": "12 May 1998. A dressmaker’s ledger: ‘Laughs a lot. Wants pockets. No.’\n\nOne month later: ‘She looked happy.’\n\nTwenty-eight years on, the same dress comes back up the stairs.\n\nUnder the Lining is out now in Kindle and paperback. Link in bio. 🖤\n\n#psychologicalthriller #thrillerbooks #bookstagram #booktok #domesticthriller #kindleunlimited #britishthriller #indieauthor #bath"
+}
