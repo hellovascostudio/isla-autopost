@@ -6,7 +6,7 @@ Read `brand/isla.md` before writing any content, and `plan/` for the current mon
 ## How it works
 - Each post is a folder `posts/queue/YYYY-MM-DD-slug/` with a `post.json`.
 - `scripts/render.py` turns the slides into `01.jpg, 02.jpg …` (1080x1350).
-- `.github/workflows/publish.yml` runs hourly and publishes every post whose `publish_at` has passed,
+- `.github/workflows/publish.yml` checks every 10 minutes (a scheduled run loops for ~5.5 h) and publishes every post whose `publish_at` has passed,
   then moves it to `posts/published/`. Never edit or delete anything in `posts/published/`.
 - The repo must stay public: Instagram fetches the images from raw.githubusercontent.com.
 - Only content merged into `main` gets published. New weeks always go through a pull request so Shelley approves them first.
