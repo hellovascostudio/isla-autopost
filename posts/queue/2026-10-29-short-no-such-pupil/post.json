@@ -1,0 +1,38 @@
+{
+  "type": "reel",
+  "style": "page",
+  "pillar": "Hooks",
+  "publish_at": "2026-10-29T12:30:00+01:00",
+  "book": "Cross When Clear",
+  "cover": "assets/covers/cross-when-clear.jpg",
+  "voice": "en-GB-SoniaNeural",
+  "rate": "-6%",
+  "hook": "The school has no such pupil.",
+  "excerpt": [
+    {
+      "text": "‘We don’t have a pupil called Ellie,’ he said.",
+      "pause": 0.6
+    },
+    "Not in any year. Not Eleanor, not Ella, not Elise.",
+    "‘She comes out with your children,’ Lorna said. ‘Every day. At quarter past three.’",
+    {
+      "text": "‘You said round the bakery corner.’",
+      "pause": 0.4
+    },
+    {
+      "text": "‘Yes.’",
+      "pause": 0.5
+    },
+    {
+      "text": "‘Not through the gate.’",
+      "key": true,
+      "pause": 0.9
+    }
+  ],
+  "end": {
+    "kicker": "Out now",
+    "title": "Cross When Clear",
+    "body": "Kindle & paperback\nLink in bio"
+  },
+  "caption": "Every afternoon a little girl crosses Lorna’s road. Then the school tells her they have no such pupil.\n\nCross When Clear is out now. Link in bio. 🖤\n\n#psychologicalthriller #thrillerbooks #bookstagram #booktok #kindleunlimited #britishthriller #indieauthor #booktokuk #gloucester"
+}
