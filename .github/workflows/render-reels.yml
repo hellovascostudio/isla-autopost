@@ -32,8 +32,10 @@ jobs:
           python-version: "3.12"
       - run: pip install pillow==11.3.0 edge-tts==7.3.1
       - name: ffmpeg
-        timeout-minutes: 8
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg && ffmpeg -version | head -1
+        uses: FedericoCarboni/setup-ffmpeg@v3
+        with:
+          ffmpeg-version: release
+      - run: ffmpeg -version | head -1
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
