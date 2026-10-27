@@ -1,0 +1,29 @@
+{
+  "type": "reel",
+  "style": "page",
+  "pillar": "Hooks",
+  "publish_at": "2026-11-08T12:30:00+01:00",
+  "book": "Under the Lining",
+  "cover": "assets/covers/under-the-lining.jpg",
+  "voice": "en-GB-SoniaNeural",
+  "rate": "-6%",
+  "hook": "Silk on silk. Always.",
+  "excerpt": [
+    "Tamsin read it aloud. ‘Silk on silk. Always. Is that a rule or a threat?’",
+    {
+      "text": "‘Both. It was Iris’s.’",
+      "pause": 0.8
+    },
+    {
+      "text": "‘Margaret will probably ring you. She rings everybody. Just, you know. You’re allowed to say no to her. Apparently nobody does.’",
+      "key": true,
+      "pause": 0.9
+    }
+  ],
+  "end": {
+    "kicker": "Out now",
+    "title": "Under the Lining",
+    "body": "Kindle & paperback\nLink in bio"
+  },
+  "caption": "A Bath workroom. A family gown. And a mother-in-law nobody says no to.\n\nUnder the Lining is out now. Link in bio. 🧵\n\n#psychologicalthriller #thrillerbooks #bookstagram #booktok #kindleunlimited #britishthriller #indieauthor #booktokuk #bath"
+}
