@@ -48,10 +48,11 @@ jobs:
             git pull -q --rebase origin main || echo "::warning::git pull failed in round $i"
             python scripts/render.py --all || true
             if [ "$MODE" = "check" ]; then
-              python scripts/publish.py --check || failed=1
+              python scripts/publish.py --check > out.log 2>&1 || { failed=1; echo "::error::$(tail -c 1500 out.log | tr '\n' ' ')"; }
             else
-              python scripts/publish.py || { failed=1; echo "::warning::publish had errors in round $i"; }
+              python scripts/publish.py > out.log 2>&1 || { failed=1; echo "::warning::round $i: $(tail -c 1500 out.log | tr '\n' ' ')"; }
             fi
+            cat out.log; rm -f out.log
             git add -A posts
             git diff --cached --quiet || { git commit -qm "Published posts [skip ci]" && git push -q origin HEAD:main; } || echo "::warning::could not save state in round $i"
             if [ "$i" -lt "$rounds" ]; then sleep 600; fi
